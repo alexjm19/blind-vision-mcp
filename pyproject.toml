@@ -1,0 +1,74 @@
+[project]
+name = "local-multimodal-mcp"
+version = "0.1.0"
+description = "MCP server that gives vision and image generation capabilities to text-only LLMs, running 100% locally"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "alexjm19", email = "alexjm@tuta.io" }
+]
+keywords = [
+    "mcp",
+    "multimodal",
+    "vision",
+    "image-generation",
+    "local",
+    "flux",
+    "gemma-4",
+    "litert",
+    "opencode",
+    "on-device-ai",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0.0",
+    "diffusers>=0.30.0",
+    "transformers>=4.52.0",
+    "torch>=2.4.0",
+    "torchvision>=0.19.0",
+    "accelerate>=0.33.0",
+    "bitsandbytes>=0.44.0",
+    "Pillow>=10.0.0",
+    "numpy>=1.24.0",
+    "opencv-python-headless>=4.9.0",
+    "huggingface-hub>=0.24.0",
+    "pydantic>=2.0.0",
+    "loguru>=0.7.0",
+    "sentencepiece>=0.2.0",
+    "litert-lm>=0.1.0",
+    "requests>=2.31.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/alexjm19/local-multimodal-mcp"
+Repository = "https://github.com/alexjm19/local-multimodal-mcp"
+Issues = "https://github.com/alexjm19/local-multimodal-mcp/issues"
+
+[project.scripts]
+local-multimodal-mcp = "mcp_server.server:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.5.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
