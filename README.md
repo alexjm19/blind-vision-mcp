@@ -184,6 +184,10 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
+## Support
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/alexjmwarea)
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=alexjm19/blind-vision-mcp&type=Date)](https://star-history.com/#alexjm19/blind-vision-mcp&Date)
