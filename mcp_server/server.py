@@ -1,13 +1,24 @@
+import os
 import subprocess
 import sys
 import threading
 import time
+from pathlib import Path
 
 import requests
 from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
 from mcp_server.tools import register_tools
+
+# Load .env file
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ[k.strip()] = v.strip()
 
 logger.remove()
 fmt = "{time:HH:mm:ss} | {level: <8} | {name} | {message}"
@@ -69,12 +80,8 @@ def _stop_litert_server():
         logger.info("LiteRT server stopped")
 
 
-# Start LiteRT eagerly at import time
-_start_litert_server()
-
-
 mcp = FastMCP(
-    "local-multimodal-mcp",
+    "blind-vision-mcp",
     instructions="MCP server for local vision and image generation",
 )
 
@@ -84,7 +91,7 @@ def main():
     # Wait for LiteRT server to be ready before accepting client requests
     _wait_litert_ready()
     register_tools(mcp)
-    logger.info("local-multimodal-mcp starting (lazy load: models loaded on first use)")
+    logger.info("blind-vision-mcp starting (lazy load: models loaded on first use)")
     try:
         mcp.run(transport="stdio")
     finally:

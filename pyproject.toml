@@ -1,6 +1,6 @@
 [project]
-name = "local-multimodal-mcp"
-version = "0.1.0"
+name = "blind-vision-mcp"
+version = "0.2.0"
 description = "MCP server that gives vision and image generation capabilities to text-only LLMs, running 100% locally"
 readme = "README.md"
 license = { text = "MIT" }
@@ -45,12 +45,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/alexjm19/local-multimodal-mcp"
-Repository = "https://github.com/alexjm19/local-multimodal-mcp"
-Issues = "https://github.com/alexjm19/local-multimodal-mcp/issues"
+Homepage = "https://github.com/alexjm19/blind-vision-mcp"
+Repository = "https://github.com/alexjm19/blind-vision-mcp"
+Issues = "https://github.com/alexjm19/blind-vision-mcp/issues"
 
 [project.scripts]
-local-multimodal-mcp = "mcp_server.server:main"
+blind-vision-mcp = "mcp_server.server:main"
 
 [dependency-groups]
 dev = [

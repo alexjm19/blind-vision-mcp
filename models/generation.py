@@ -17,6 +17,14 @@ def _seed_everything(seed: int):
         torch.cuda.manual_seed_all(seed)
 
 
+def _get_pipeline_cls(model_id: str):
+    from diffusers import Flux2KleinPipeline, FluxPipeline
+
+    if "klein" in model_id.lower() or "flux2" in model_id.lower():
+        return Flux2KleinPipeline
+    return FluxPipeline
+
+
 class GenerationModel:
     def __init__(self):
         self.model_id = settings.generation_model_id
@@ -25,23 +33,14 @@ class GenerationModel:
         self._load()
 
     def _load(self):
-        from diffusers import FluxPipeline
-
         logger.info(f"Loading generation model: {self.model_id}")
 
-        dtype = torch.bfloat16
-        if settings.generation_fp8:
-            dtype = torch.float8_e4m3fn
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        cls = _get_pipeline_cls(self.model_id)
+        hf_token = __import__("os").environ.get("HF_TOKEN") or None
 
-        if torch.cuda.is_available():
-            self._device = "cuda"
-        else:
-            self._device = "cpu"
-
-        self._pipe = FluxPipeline.from_pretrained(
-            self.model_id,
-            torch_dtype=dtype,
-            device_map="auto" if self._device == "cuda" else None,
+        self._pipe = cls.from_pretrained(
+            self.model_id, torch_dtype=torch.bfloat16, token=hf_token
         )
 
         if self._device == "cuda":
@@ -49,8 +48,9 @@ class GenerationModel:
         else:
             self._pipe = self._pipe.to(self._device)
 
-        self._pipe.eval()
-        logger.info(f"Generation model {self.model_id} loaded on {self._device}")
+        if hasattr(self._pipe, "eval"):
+            self._pipe.eval()
+        logger.info(f"Generation model loaded on {self._device}")
 
     @torch.no_grad()
     def generate(
@@ -68,26 +68,17 @@ class GenerationModel:
             seed = random.randint(0, 2**32 - 1)
         _seed_everything(seed)
 
-        generator = torch.Generator(device=self._device).manual_seed(seed)
-
-        kwargs = {
-            "prompt": prompt,
-            "width": width,
-            "height": height,
-            "num_inference_steps": steps,
-            "guidance_scale": guidance_scale,
-            "generator": generator,
-            "output_type": "pil",
-        }
-        if negative_prompt:
-            kwargs["negative_prompt"] = negative_prompt
-
-        image = self._pipe(**kwargs).images[0]
+        generator = torch.Generator(device="cuda").manual_seed(seed)
+        result = self._pipe(
+            prompt=prompt,
+            generator=generator,
+            num_inference_steps=steps,
+            guidance_scale=guidance_scale,
+        ).images[0]
 
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        image.save(output_path)
-
-        return {"seed": seed}
+        result.save(output_path)
+        return {"seed": seed, "image_path": output_path}
 
 
 class EditModel:
@@ -98,23 +89,14 @@ class EditModel:
         self._load()
 
     def _load(self):
-        from diffusers import FluxFillPipeline
+        from diffusers import FluxInpaintPipeline
 
         logger.info(f"Loading edit model: {self.model_id}")
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        hf_token = __import__("os").environ.get("HF_TOKEN") or None
 
-        dtype = torch.bfloat16
-        if settings.edit_fp8:
-            dtype = torch.float8_e4m3fn
-
-        if torch.cuda.is_available():
-            self._device = "cuda"
-        else:
-            self._device = "cpu"
-
-        self._pipe = FluxFillPipeline.from_pretrained(
-            self.model_id,
-            torch_dtype=dtype,
-            device_map="auto" if self._device == "cuda" else None,
+        self._pipe = FluxInpaintPipeline.from_pretrained(
+            self.model_id, torch_dtype=torch.bfloat16, token=hf_token
         )
 
         if self._device == "cuda":
@@ -122,8 +104,9 @@ class EditModel:
         else:
             self._pipe = self._pipe.to(self._device)
 
-        self._pipe.eval()
-        logger.info(f"Edit model {self.model_id} loaded on {self._device}")
+        if hasattr(self._pipe, "eval"):
+            self._pipe.eval()
+        logger.info(f"Edit model loaded on {self._device}")
 
     @torch.no_grad()
     def edit(
@@ -136,23 +119,30 @@ class EditModel:
         strength: float = 0.85,
         seed: int | None = None,
     ) -> dict:
+        width, height = image.size
+        if width > 1024 or height > 1024:
+            scale = 1024 / max(width, height)
+            image = image.resize(
+                (int(width * scale), int(height * scale)), Image.LANCZOS
+            )
+            mask = mask.resize(
+                (int(width * scale), int(height * scale)), Image.LANCZOS
+            )
+
         if seed is None:
             seed = random.randint(0, 2**32 - 1)
         _seed_everything(seed)
 
-        generator = torch.Generator(device=self._device).manual_seed(seed)
-
+        generator = torch.Generator(device="cuda").manual_seed(seed)
         result = self._pipe(
             prompt=prompt,
             image=image,
             mask_image=mask,
+            generator=generator,
             num_inference_steps=steps,
             strength=strength,
-            generator=generator,
-            output_type="pil",
         ).images[0]
 
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         result.save(output_path)
-
-        return {"seed": seed}
+        return {"seed": seed, "image_path": output_path}

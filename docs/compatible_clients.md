@@ -12,9 +12,9 @@ which cannot natively process images.
 ```json
 {
   "mcpServers": {
-    "local-multimodal-mcp": {
+    "blind-vision-mcp": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/local-multimodal-mcp", "local-multimodal-mcp"]
+      "args": ["run", "--directory", "/path/to/blind-vision-mcp", "blind-vision-mcp"]
     }
   }
 }
@@ -28,7 +28,7 @@ which cannot natively process images.
 ## Cursor
 
 [Cursor](https://cursor.sh) supports MCP in its settings panel.
-Add a new MCP server pointing to the local-multimodal-mcp command.
+Add a new MCP server pointing to the blind-vision-mcp command.
 
 ## Cline
 

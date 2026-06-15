@@ -1,4 +1,4 @@
-# local-multimodal-mcp Implementation Plan
+# blind-vision-mcp Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development or executing-plans.
 

@@ -50,3 +50,4 @@ Thumbs.db
 *.pth
 *.bin
 *.safetensors
+.env

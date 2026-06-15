@@ -16,8 +16,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ## Clone & Setup
 
 ```bash
-git clone https://github.com/alexjm19/local-multimodal-mcp.git
-cd local-multimodal-mcp
+git clone https://github.com/alexjm19/blind-vision-mcp.git
+cd blind-vision-mcp
 
 uv sync
 ```
@@ -39,13 +39,13 @@ Add to your `opencode.json`:
 ```json
 {
   "mcpServers": {
-    "local-multimodal-mcp": {
+    "blind-vision-mcp": {
       "command": "uv",
       "args": [
         "run",
         "--directory",
-        "/path/to/local-multimodal-mcp",
-        "local-multimodal-mcp"
+        "/path/to/blind-vision-mcp",
+        "blind-vision-mcp"
       ]
     }
   }
@@ -59,13 +59,13 @@ Add to your `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "local-multimodal-mcp": {
+    "blind-vision-mcp": {
       "command": "uv",
       "args": [
         "run",
         "--directory",
-        "/path/to/local-multimodal-mcp",
-        "local-multimodal-mcp"
+        "/path/to/blind-vision-mcp",
+        "blind-vision-mcp"
       ]
     }
   }
@@ -77,9 +77,9 @@ Add to your `claude_desktop_config.json`:
 In Cursor settings → MCP Servers → Add:
 
 ```
-Name: local-multimodal-mcp
+Name: blind-vision-mcp
 Type: command
-Command: uv run --directory /path/to/local-multimodal-mcp local-multimodal-mcp
+Command: uv run --directory /path/to/blind-vision-mcp blind-vision-mcp
 ```
 
 ## First Run

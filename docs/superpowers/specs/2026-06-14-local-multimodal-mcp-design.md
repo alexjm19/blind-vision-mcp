@@ -1,4 +1,4 @@
-# local-multimodal-mcp Design
+# blind-vision-mcp Design
 
 ## Purpose
 MCP server that gives vision + image generation to text-only LLMs.

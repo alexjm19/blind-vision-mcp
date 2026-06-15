@@ -1,184 +1,193 @@
-# local-multimodal-mcp
+# blind-vision-mcp
 
-> Give vision and image superpowers to any text-only LLM — 100% local, zero cloud, zero API keys.
+> Give vision to any text-only LLM — 100% local, no API costs, your privacy intact.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)]()
-[![GPU](https://img.shields.io/badge/GPU-NVIDIA%20≥8GB%20VRAM-green)]()
-[![Models](https://img.shields.io/badge/models-Apache%202.0-green)]()
-[![Gemma 4](https://img.shields.io/badge/Gemma_4-E2B-purple)]()
-[![LiteRT](https://img.shields.io/badge/runtime-LiteRT-orange)]()
-
----
-
-## What is this?
-
-An **MCP server** that gives any text-only LLM (DeepSeek, Claude, Gemini, etc.) the ability to **see images** and **generate images** — running entirely on your GPU. No data ever leaves your machine.
-
-| Tool | What it does |
-|------|-------------|
-| `vision_describe` | Analyzes images in extreme detail |
-| `vision_compare` | Compares two images side by side |
-| `image_generate` | Creates images from text descriptions |
-| `image_edit` | Edits specific zones using masks |
-| `get_status` | Shows VRAM usage and loaded models |
+[![Version](https://img.shields.io/badge/version-0.1.0--beta-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-green)]()
+[![Python](https://img.shields.io/badge/python-3.11+-blue)]()
+[![GPU](https://img.shields.io/badge/GPU-NVIDIA_≥8GB_VRAM-green)]()
+[![Gemma 4](https://img.shields.io/badge/vision-Gemma_4_E2B-purple)]()
+[![Runtime](https://img.shields.io/badge/runtime-LiteRT-orange)]()
 
 ---
 
-## Why LiteRT + Gemma 4?
+## Why this exists
 
-Most MCP vision servers use PyTorch transformers with 7B+ param models that consume **6-10 GB VRAM**. This server uses **Google's LiteRT runtime** with **Gemma 4 E2B** — the same stack powering Google's on-device AI Gallery app.
+**I use DeepSeek v4 Flash** — an incredible text model. But it's **blind**. It can't see screenshots, images, or UI layouts.
 
-| Metric | Typical PyTorch setup | **This server** |
-|--------|---------------------|-----------------|
-| Vision VRAM | 6-10 GB | **~2.6 GB** |
-| Model size on disk | 7-10 GB | **2.6 GB** |
-| Loading spike | Full BF16 (10+ GB) | **None** (pre-quantized) |
-| Engine | bitsandbytes + transformers | **LiteRT** (Google) |
+I was tired of:
+- Paying **$20-200/month** for vision-capable APIs (GPT-4 Vision, Claude)
+- Sending **sensitive screenshots to the cloud**
+- **Context switching** between coding and describing images manually
 
-The model loads directly in mixed 2/4/8-bit quantization — no "load BF16 first then quantize" VRAM spike.
+So I built **blind-vision-mcp**: an MCP server that sits between your text LLM and your desktop, letting it "see" through an **on-device vision model** — Google's **Gemma 4 E2B** running via **LiteRT**.
+
+### My specific use case
+
+I control an **Android emulator** that takes **screenshots** of the device. DeepSeek v4 Flash reads those screenshots via blind-vision-mcp and tells the emulator what to do next. It works like this:
+
+```
+Emulator takes screenshot → blind-vision-mcp analyzes it with Gemma 4 → 
+DeepSeek reads the description → decides next action → ADB command
+```
+
+All of this happens **locally**, **privately**, and **without paying per-token API fees**.
 
 ---
 
-## Requirements
+## What it does
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| **GPU** | NVIDIA ≥8 GB VRAM | NVIDIA ≥12 GB VRAM |
-| **RAM** | 16 GB | 32 GB |
-| **Storage** | 15 GB free | 30 GB free |
-| **CUDA** | 12.x | 12.x |
-| **Python** | 3.11 | 3.12 |
+| Capability | Status | Model |
+|-----------|--------|-------|
+| 👁️ **Image analysis** | ✅ **Stable** | Gemma 4 E2B via LiteRT (~2.6 GB VRAM) |
+| 🔄 **Image comparison** | ✅ **Stable** | Gemma 4 E2B via LiteRT |
+| 🎨 **Image generation** | 🧪 **Beta** | FLUX.1-schnell (needs HF token) |
+| ✏️ **Image editing** | 🧪 **Beta** | FLUX Kontext Dev (needs HF token) |
 
-**Vision-only** runs on ≥8 GB GPUs. **Vision + Generation** needs ≥12 GB.
+---
+
+## Key features
+
+- **No API keys needed** for vision — runs 100% on your GPU
+- **~2.6 GB VRAM** for vision (not 10+ GB like other solutions)
+- **GPU-first** — falls back to CPU if GPU fails
+- **Google LiteRT** — same stack powering Gemini Nano on Android
+- **Macro-friendly** — perfect for automating emulators, browsers, UIs
+- **Works with any MCP client** — OpenCode, Claude Desktop, Cursor, Cline
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Install uv
+# 1. Prerequisites
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 2. Clone and install
-git clone https://github.com/alexjm19/local-multimodal-mcp.git
-cd local-multimodal-mcp
+git clone https://github.com/alexjm19/blind-vision-mcp.git
+cd blind-vision-mcp
 uv sync
 
-# 3. Import the vision model (first time only, downloads 2.6 GB)
+# 3. Import the vision model (one-time, downloads ~2.6 GB)
 litert-lm import \
   --from-huggingface-repo litert-community/gemma-4-E2B-it-litert-lm \
   gemma-4-E2B-it.litertlm \
   gemma4-vision
 
-# 4. Run the server
-uv run local-multimodal-mcp
+# 4. Start the server
+uv run blind-vision-mcp
 ```
+
+> **For image generation/editing**: Create a `.env` file with your HF token:
+> ```
+> HF_TOKEN=hf_your_token_here
+> ```
+> Then accept terms at https://huggingface.co/black-forest-labs/FLUX.1-schnell
 
 ---
 
-## Architecture
+## Configuration for OpenCode
 
-```
-┌──────────────┐     JSON-RPC/stdin/stdout     ┌──────────────────────┐
-│  MCP Client   │ ◄──────────────────────────► │  mcp_server/server   │
-│  (OpenCode,   │                               │  + tools.py          │
-│   Claude...)  │                               └──────┬───────────────┘
-└──────────────┘                                      │
-                                              ┌───────▼───────────────┐
-                                              │    ModelManager        │
-                                              │    (auto-swap, LRU-1)  │
-                                              └───┬──────────┬────────┘
-                                        ┌────────▼──┐  ┌────▼──────────┐
-                                        │  LiteRT    │  │  FLUX.1       │
-                                        │  + Gemma 4 │  │  schnell /    │
-                                        │  E2B 2.6GB │  │  Kontext Dev  │
-                                        │  (vision)  │  │  (gen/edit)   │
-                                        └────────────┘  └───────────────┘
-```
+Add to your `opencode.json`:
 
-All 3 models (~19 GB total) can't fit in 12 GB simultaneously. **ModelManager** handles automatic swap:
-
-| Call | Action |
-|------|--------|
-| `vision_describe` | Starts LiteRT server → Gemma 4 E2B (~2.6 GB) |
-| `image_generate` | Kills LiteRT → Loads FLUX.1-schnell (~8 GB) |
-| `image_edit` | Loads FLUX Kontext Dev (~8 GB) |
-| `vision_describe` again | Kills FLUX → Restarts LiteRT |
-
----
-
-## Client Configuration
-
-### OpenCode
 ```json
 {
   "mcpServers": {
-    "local-multimodal-mcp": {
+    "blind-vision-mcp": {
       "command": "uv",
       "args": [
         "run",
         "--directory",
-        "/path/to/local-multimodal-mcp",
-        "local-multimodal-mcp"
+        "/path/to/blind-vision-mcp",
+        "blind-vision-mcp"
       ]
     }
   }
 }
 ```
 
-### Claude Desktop / Cursor / Cline
-See [installation guide](docs/installation.md).
-
 ---
 
 ## Usage Examples
 
 ```bash
-# Describe an image
-vision_describe(image_path="/path/to/photo.jpg")
+# Analyze a screenshot (perfect for emulator control)
+vision_describe(image="/path/to/screenshot.png")
 
-# Compare two images
-vision_compare(image_path_a="/path/to/a.png", image_path_b="/path/to/b.png")
+# Compare before/after
+vision_compare(image_a="/path/to/before.png", image_b="/path/to/after.png")
 
-# Generate an image
-image_generate(description="a mystical forest with glowing mushrooms")
+# Generate an image (beta)
+image_generate(description="a beautiful landscape")
 
-# Edit a masked area
-image_edit(image_path="photo.jpg", mask_path="mask.png", description="replace with cherry blossom tree")
+# Check server status
+get_status()
 ```
 
 ---
 
-## Models & Licenses
+## How vision works (the cool part)
 
-All models are **Apache 2.0** — fully permissive, no restrictions:
+```
+┌─────────────────────────────────────────────────────────┐
+│  DeepSeek v4 Flash (text-only)                          │
+│  "What's on the screen? → vision_describe(screenshot)"  │
+└────────────────────────┬────────────────────────────────┘
+                         │ MCP protocol (stdin/stdout)
+┌────────────────────────▼────────────────────────────────┐
+│  blind-vision-mcp server                                 │
+│  ┌────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ tools.py    │→│ LiteRT server │→│ Gemma 4 E2B     │  │
+│  │ (MCP tools) │  │ (port 9380)  │  │ (2.6 GB VRAM)   │  │
+│  └────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
 
-| Model | License | Purpose | Size |
-|-------|---------|---------|------|
-| Gemma 4 E2B (Google) | Apache 2.0 | Image understanding | 2.6 GB |
-| FLUX.1-schnell (Black Forest Labs) | Apache 2.0 | Image generation | ~8 GB |
-| FLUX.1 Kontext Dev | Apache 2.0 | Image editing | ~8 GB |
-
----
-
-## Why this matters
-
-Existing MCP vision solutions either:
-- **Send your data to the cloud** (OpenAI Vision, Google Vertex)
-- **Consume 10+ GB VRAM** (Qwen2-VL-7B, LLaVA)
-- **Require complicated setup** (multiple conda envs, manual downloads)
-
-This server gives you **Gemma 4 quality** at **2.6 GB VRAM** with a **single command** install. Powered by Google's LiteRT — the same technology running Gemini Nano on Android.
+The vision model (**Gemma 4 E2B**) runs entirely on your GPU via **Google's LiteRT runtime**. No data ever leaves your machine. The model is pre-quantized (mixed 2/4/8-bit) and loads directly at ~2.6 GB — no "load BF16 first then quantize" memory spike.
 
 ---
 
-## Star History
+## Why not just use a vision LLM?
 
-If you find this useful, **⭐ star the repo**! It helps others discover local-first AI tools.
+| Solution | Cost | Privacy | VRAM | Quality |
+|----------|------|---------|------|---------|
+| GPT-4 Vision | $10-20/mo | ❌ Cloud | N/A | Excellent |
+| Claude Vision | $20/mo | ❌ Cloud | N/A | Excellent |
+| Qwen2-VL-7B (local) | Free | ✅ Local | ~10 GB VRAM | Good |
+| **blind-vision-mcp** | **Free** | **✅ Local** | **~2.6 GB VRAM** | **Great** |
+
+---
+
+## Requirements
+
+| Component | Minimum |
+|-----------|---------|
+| **GPU** | NVIDIA ≥8 GB VRAM (vision) / ≥12 GB (vision + gen) |
+| **RAM** | 16 GB |
+| **Storage** | 5 GB free for vision model |
+| **CUDA** | 12.x |
+
+---
+
+## Project Status
+
+- **Vision**: ✅ Stable and tested
+- **Image generation**: 🧪 In beta (needs HF token, FLUX model)
+- **Image editing**: 🧪 In beta
+- **Version**: 0.1.0 — API may change
 
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+## Star History
+
+If this saves you from another API bill, **⭐ star the repo**. It helps others find local-first AI tools.
+
+---
+
+Built with ❤️ by [alexjm19](https://github.com/alexjm19)

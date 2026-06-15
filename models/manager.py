@@ -1,4 +1,7 @@
+import asyncio
 import gc
+import threading
+import time
 from collections.abc import Awaitable
 from typing import Callable, Optional
 
@@ -9,15 +12,36 @@ from mcp_server.config import settings
 
 
 ProgressCb = Callable[[str], Awaitable[None]]
+IDLE_TIMEOUT = 60
 
 
 class ModelManager:
     _loaded_model: Optional[str] = None
+    _last_used: float = 0.0
     _vision_model = None
     _generation_model = None
     _edit_model = None
 
+    def __init__(self):
+        self._start_idle_monitor()
+
+    def _start_idle_monitor(self):
+        def _check():
+            while True:
+                time.sleep(30)
+                if self._loaded_model and time.time() - self._last_used > IDLE_TIMEOUT:
+                    logger.info(f"Model idle for {IDLE_TIMEOUT}s, unloading...")
+                    try:
+                        loop = asyncio.new_event_loop()
+                        loop.run_until_complete(self._unload_current())
+                        loop.close()
+                    except Exception as e:
+                        logger.warning(f"Idle unload failed: {e}")
+
+        threading.Thread(target=_check, daemon=True).start()
+
     async def get_vision_model(self, progress_cb: Optional[ProgressCb] = None):
+        self._last_used = time.time()
         if self._loaded_model == "vision" and self._vision_model is not None:
             logger.debug("Vision model already loaded, reusing")
             return self._vision_model
@@ -47,6 +71,7 @@ class ModelManager:
             raise RuntimeError(f"Failed to load vision model: {e}") from e
 
     async def get_generation_model(self, progress_cb: Optional[ProgressCb] = None):
+        self._last_used = time.time()
         if self._loaded_model == "generation" and self._generation_model is not None:
             logger.debug("Generation model already loaded, reusing")
             return self._generation_model
@@ -68,6 +93,7 @@ class ModelManager:
         return self._generation_model
 
     async def get_edit_model(self, progress_cb: Optional[ProgressCb] = None):
+        self._last_used = time.time()
         if self._loaded_model == "edit" and self._edit_model is not None:
             logger.debug("Edit model already loaded, reusing")
             return self._edit_model
@@ -108,6 +134,7 @@ class ModelManager:
         elif self._loaded_model == "edit" and self._edit_model is not None:
             self._edit_model = None
 
+        self._loaded_model = None
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
