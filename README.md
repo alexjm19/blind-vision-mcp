@@ -186,6 +186,8 @@ MIT — see [LICENSE](LICENSE).
 
 ## Star History
 
+[![Star History Chart](https://api.star-history.com/svg?repos=alexjm19/blind-vision-mcp&type=Date)](https://star-history.com/#alexjm19/blind-vision-mcp&Date)
+
 If this saves you from another API bill, **⭐ star the repo**. It helps others find local-first AI tools.
 
 ---
