@@ -2,12 +2,13 @@
 
 > Give vision to any text-only LLM — 100% local, no API costs, your privacy intact.
 
-[![Version](https://img.shields.io/badge/version-0.1.0--beta-blue)]()
+[![Version](https://img.shields.io/badge/version-0.2.0--beta-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 [![Python](https://img.shields.io/badge/python-3.11+-blue)]()
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA_≥8GB_VRAM-green)]()
 [![Gemma 4](https://img.shields.io/badge/vision-Gemma_4_E2B-purple)]()
 [![Runtime](https://img.shields.io/badge/runtime-LiteRT-orange)]()
+[![Image Gen](https://img.shields.io/badge/gen-SDXL_Turbo-blue)]()
 
 ---
 
@@ -41,8 +42,8 @@ All of this happens **locally**, **privately**, and **without paying per-token A
 |-----------|--------|-------|
 | 👁️ **Image analysis** | ✅ **Stable** | Gemma 4 E2B via LiteRT (~2.6 GB VRAM) |
 | 🔄 **Image comparison** | ✅ **Stable** | Gemma 4 E2B via LiteRT |
-| 🎨 **Image generation** | 🧪 **Beta** | FLUX.1-schnell (needs HF token) |
-| ✏️ **Image editing** | 🧪 **Beta** | FLUX Kontext Dev (needs HF token) |
+| 🎨 **Image generation** | ✅ **Stable** | SDXL-Turbo (fp16, ~7 GB VRAM, no HF token needed) |
+| ✏️ **Image editing** | 🧪 **In development** | Coming soon |
 
 ---
 
@@ -162,9 +163,9 @@ The vision model (**Gemma 4 E2B**) runs entirely on your GPU via **Google's Lite
 
 | Component | Minimum |
 |-----------|---------|
-| **GPU** | NVIDIA ≥8 GB VRAM (vision) / ≥12 GB (vision + gen) |
+| **GPU** | NVIDIA ≥8 GB VRAM |
 | **RAM** | 16 GB |
-| **Storage** | 5 GB free for vision model |
+| **Storage** | 5 GB free for vision model + 7 GB for gen model |
 | **CUDA** | 12.x |
 
 ---
@@ -172,9 +173,9 @@ The vision model (**Gemma 4 E2B**) runs entirely on your GPU via **Google's Lite
 ## Project Status
 
 - **Vision**: ✅ Stable and tested
-- **Image generation**: 🧪 In beta (needs HF token, FLUX model)
-- **Image editing**: 🧪 In beta
-- **Version**: 0.1.0 — API may change
+- **Image generation**: ✅ Stable (SDXL-Turbo, pure GPU, no offload)
+- **Image editing**: 🧪 In development
+- **Version**: 0.2.0 — API may change
 
 ---
 
