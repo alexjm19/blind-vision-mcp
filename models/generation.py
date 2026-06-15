@@ -18,11 +18,17 @@ def _seed_everything(seed: int):
 
 
 def _get_pipeline_cls(model_id: str):
-    from diffusers import Flux2KleinPipeline, FluxPipeline
+    from diffusers import (
+        AutoPipelineForText2Image,
+        Flux2KleinPipeline,
+        FluxPipeline,
+    )
 
     if "klein" in model_id.lower() or "flux2" in model_id.lower():
         return Flux2KleinPipeline
-    return FluxPipeline
+    if "flux" in model_id.lower():
+        return FluxPipeline
+    return AutoPipelineForText2Image
 
 
 class GenerationModel:
@@ -39,9 +45,12 @@ class GenerationModel:
         cls = _get_pipeline_cls(self.model_id)
         hf_token = __import__("os").environ.get("HF_TOKEN") or None
 
-        self._pipe = cls.from_pretrained(
-            self.model_id, torch_dtype=torch.bfloat16, token=hf_token
-        )
+        dtype = torch.float16 if "sdxl" in self.model_id.lower() else torch.bfloat16
+        kwargs = {"torch_dtype": dtype, "token": hf_token}
+        if dtype == torch.float16:
+            kwargs["variant"] = "fp16"
+
+        self._pipe = cls.from_pretrained(self.model_id, **kwargs)
 
         if self._device == "cuda":
             self._pipe.enable_model_cpu_offload()
