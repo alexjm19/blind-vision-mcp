@@ -52,7 +52,7 @@ class GenerationModel:
 
         self._pipe = cls.from_pretrained(self.model_id, **kwargs)
 
-        if self._device == "cuda":
+        if self._device == "cuda" and "turbo" not in self.model_id.lower():
             self._pipe.enable_model_cpu_offload()
         else:
             self._pipe = self._pipe.to(self._device)
