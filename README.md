@@ -190,8 +190,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## Star History
 
-## Star History
-
 <a href="https://www.star-history.com/?repos=alexjm19%2Fblind-vision-mcp&type=date&legend=top-left">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=alexjm19/blind-vision-mcp&type=date&theme=dark&legend=top-left" />
