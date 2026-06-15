@@ -5,7 +5,7 @@ from pathlib import Path
 @dataclass
 class ModelConfig:
     vision_model_id: str = "litert-community/gemma-4-E2B-it-litert-lm"
-    generation_model_id: str = "stabilityai/sdxl-turbo"
+    generation_model_id: str = "black-forest-labs/FLUX.1-schnell"
     edit_model_id: str = "black-forest-labs/FLUX.1-Kontext-Dev"
 
     vision_4bit: bool = True
