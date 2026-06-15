@@ -109,6 +109,46 @@ Add to your `opencode.json`:
 
 ---
 
+## Self-Configuration Prompt
+
+Give this prompt to any LLM to have it configure itself to use blind-vision-mcp:
+
+```markdown
+To give yourself vision capabilities, I have installed **blind-vision-mcp** on this machine.
+It is an MCP server that allows text-only models like you to analyze images and generate images.
+
+## What you need to do
+
+1. Check if blind-vision-mcp is installed:
+   ```bash
+   pip show blind-vision-mcp
+   ```
+
+2. If not installed, ask the user to run:
+   ```bash
+   pip install blind-vision-mcp
+   ```
+
+3. Import the vision model (one-time):
+   ```bash
+   litert-lm import \
+     --from-huggingface-repo litert-community/gemma-4-E2B-it-litert-lm \
+     gemma-4-E2B-it.litertlm \
+     gemma4-vision
+   ```
+
+4. When you need to see an image, call this tool:
+   - `vision_describe(image="/path/to/image.jpg")` for detailed analysis
+   - `vision_compare(image_a="...", image_b="...")` to compare
+
+5. When you need to generate an image:
+   - `image_generate(description="...")`
+
+The server starts automatically on first use. The vision model uses ~2.6 GB VRAM via LiteRT.
+```
+
+---
+
 ## Usage Examples
 
 ```bash
