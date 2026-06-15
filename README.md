@@ -2,7 +2,7 @@
 
 > Give vision to any text-only LLM — 100% local, no API costs, your privacy intact.
 
-[![Version](https://img.shields.io/badge/version-0.2.0--beta-blue)]()
+[![Version](https://img.shields.io/badge/version-0.3.0--beta-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 [![Python](https://img.shields.io/badge/python-3.11+-blue)]()
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA_≥8GB_VRAM-green)]()

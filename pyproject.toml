@@ -1,6 +1,6 @@
 [project]
 name = "blind-vision-mcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "MCP server that gives vision and image generation capabilities to text-only LLMs, running 100% locally"
 readme = "README.md"
 license = { text = "MIT" }
